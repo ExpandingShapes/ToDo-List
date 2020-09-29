@@ -22,3 +22,5 @@ project/plugins/project/
 
 # macOS specific
 .DS_Store
+
+.g8
