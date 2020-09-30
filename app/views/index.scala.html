@@ -1,6 +1,14 @@
-@(item: TodolistItem)
-
+@(items: List[TodolistItem])
 @main("Welcome to Play") {
-  <h1>Welcome to Play!</h1>
-  <h2>The item is @item.description</h2>
+
+  <h1>Todos</h1>
+  <form method="post" action="addItem">
+    todo: <input type="text" name="description"/>
+    <input type="submit"/>
+  </form>
+  <ul>
+    @for(item <- items) {
+      <li>@item.description</li>
+    }
+  </ul>
 }
