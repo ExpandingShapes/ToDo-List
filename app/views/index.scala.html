@@ -36,6 +36,8 @@
         data: JSON.stringify({uuid: uuid}),
         dataType: 'json'
         });
+        // if the removal was successful, otherwise alert about the failure
+        $('#' + uuid).remove();
       console.log(uuid)
     }
     $('#postItemFormId').submit(function(event) {
