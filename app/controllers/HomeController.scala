@@ -13,9 +13,11 @@ import play.modules.reactivemongo.{
   ReactiveMongoComponents
 }
 import reactivemongo.api.Cursor
-import reactivemongo.play.json._, collection._
+import reactivemongo.play.json._
+import collection._
 import play.api.mvc._
 import play.api.libs.json._
+import scala.util.{Failure, Success}
 
 @Singleton
 class HomeController @Inject() (
@@ -51,22 +53,46 @@ class HomeController @Inject() (
 
         // pass the list of items
         futurePersonsList.map { items =>
-          Ok(views.html.index(items))
+          Ok(views.html.index(items.reverse))
         }
       }
     }
 
   //POST
   def addItem(): Action[JsValue] =
-    Action.async(parse.json) { request =>
+    Action.async(parse.json) { implicit request: Request[JsValue] =>
       request.body
         .validate[TodolistItem]
         .map { item =>
           collection.flatMap(_.insert.one(item)).map { lastError =>
             logger.debug(s"Successfully inserted with LastError: $lastError")
-            Created
+            Created(
+              Json.obj("uuid" -> item.uuid.toString)
+            )
           }
         }
         .getOrElse(Future.successful(BadRequest("invalid json")))
     }
+
+  //DELETE
+  def removeItem(): Unit =
+    Action.async(parse.json) { implicit request: Request[JsValue] =>
+      {
+        //TODO: match validate result
+        val uuid: String = request.body.validate[String].getOrElse("")
+        val selector = Json.obj("uuid" -> uuid)
+        val updatedField = Json.obj("isDeleted" -> true)
+        collection
+          .flatMap(
+            _.update.one(selector, updatedField, upsert = false, multi = false)
+          )
+          .onComplete {
+            case Failure(exception) =>
+              logger.debug(exception.toString)
+              InternalServerError
+            case Success(value) => NoContent
+          }
+      }
+    }
+
 }

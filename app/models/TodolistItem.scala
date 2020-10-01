@@ -1,16 +1,16 @@
 package models
 
-import play.api.libs.json.OFormat
+import java.util.UUID
+import play.api.libs.json.{OFormat, Json}
 
 case class TodolistItem(
+    uuid: UUID = UUID.randomUUID(),
     description: String = "",
     isCompleted: Boolean = false,
     isDeleted: Boolean = false
 )
 
 object TodolistItem {
-  import play.api.libs.json.Json
-
   implicit val todolistItemFormat: OFormat[TodolistItem] =
-    Json.format[TodolistItem]
+    Json.using[Json.WithDefaultValues].format[TodolistItem]
 }

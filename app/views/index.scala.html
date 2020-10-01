@@ -1,14 +1,75 @@
 @(items: List[TodolistItem])
-@main("Welcome to Play") {
+@main("Todo") {
 
   <h1>Todos</h1>
-  <form method="post" action="addItem">
-    todo: <input type="text" name="description"/>
+  <form id="postItemFormId" method="post" action="addItem">
+    todo: <input type="text" id="itemDescription" name="itemDescription"/>
     <input type="submit"/>
   </form>
-  <ul>
+  <div id="todosListId">
     @for(item <- items) {
-      <li>@item.description</li>
+      <div id="@item.uuid">
+      @if(item.isCompleted) {
+          <del>
+            <input type="checkbox" checked>@item.description
+            <input type="button" value="Delete" onclick="deleteItem('@item.uuid')">
+          </del>
+      } else {
+          <label>
+            <input type="checkbox">@item.description
+            <input type="button" value="Delete" onclick="deleteItem('@item.uuid')">
+          </label>
+      }
+      </div>
     }
-  </ul>
+  </div>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.2/jquery.min.js"></script>
+  <script language="JavaScript">
+    function deleteItem(uuid) {
+      var deleting = $.ajax({
+        headers: {
+          'Accept': 'text/json',
+          'Content-Type': 'text/json'
+        },
+        type: 'DELETE',
+        url: url,
+        data: JSON.stringify({uuid: uuid}),
+        dataType: 'json'
+        });
+      console.log(uuid)
+    }
+    $('#postItemFormId').submit(function(event) {
+      event.preventDefault();
+      var $form = $(this),
+        url = $form.attr('action');
+      var posting = $.ajax({
+        headers: {
+          'Accept': 'text/json',
+          'Content-Type': 'text/json'
+        },
+        type: 'POST',
+        url: url,
+        data: JSON.stringify({description: $('#itemDescription').val()}),
+        dataType: 'json',
+        statusCode: {
+          201: function(data) {
+            var newItem = "<div id="
+            newItem += data.uuid
+            newItem += "><label><input type='checkbox'>"
+            newItem += $("#itemDescription").val()
+            newItem += "<input type='button' value='Delete' onclick=deleteItem('"
+            newItem += data.uuid
+            newItem += "')></label></div>"
+            $(newItem).prependTo($("#todosListId"))
+            // Clear the unput
+            $('#itemDescription').val('')
+            console.log("created")
+          },
+          400: function() {
+            console.log("bad request");
+          }
+        }
+      });
+    });
+  </script>
 }
