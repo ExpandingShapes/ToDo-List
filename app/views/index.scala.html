@@ -1,9 +1,9 @@
-@(items: List[TodolistItem])
+@(items: List[TodoItem])
 @main("Todo") {
 
   <h1>Todos</h1>
   <form id="postItemFormId" method="post" action="addItem">
-    todo: <input type="text" id="itemDescription" name="itemDescription"/>
+    todo: <input type="text" id="itemname" name="itemname"/>
     <input type="submit"/>
   </form>
   <div id="todosListId">
@@ -11,12 +11,12 @@
       <div id="@item.uuid">
       @if(item.isCompleted) {
           <del>
-            <input type="checkbox" checked>@item.description
+            <input type="checkbox" checked>@item.name
             <input type="button" value="Delete" onclick="deleteItem('@item.uuid')">
           </del>
       } else {
           <label>
-            <input type="checkbox">@item.description
+            <input type="checkbox">@item.name
             <input type="button" value="Delete" onclick="deleteItem('@item.uuid')">
           </label>
       }
@@ -51,20 +51,20 @@
         },
         type: 'POST',
         url: url,
-        data: JSON.stringify({description: $('#itemDescription').val()}),
+        data: JSON.stringify({name: $('#itemname').val()}),
         dataType: 'json',
         statusCode: {
           201: function(data) {
             var newItem = "<div id="
             newItem += data.uuid
             newItem += "><label><input type='checkbox'>"
-            newItem += $("#itemDescription").val()
+            newItem += $("#itemname").val()
             newItem += "<input type='button' value='Delete' onclick=deleteItem('"
             newItem += data.uuid
             newItem += "')></label></div>"
             $(newItem).prependTo($("#todosListId"))
             // Clear the unput
-            $('#itemDescription').val('')
+            $('#itemname').val('')
             console.log("created")
           },
           400: function() {

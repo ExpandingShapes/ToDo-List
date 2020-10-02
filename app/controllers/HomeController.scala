@@ -1,7 +1,7 @@
 package controllers
 
 import javax.inject._
-import models.TodolistItem
+import models.TodoItem._
 import reactivemongo.play.json.collection.JSONCollection
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -14,9 +14,10 @@ import play.modules.reactivemongo.{
 }
 import reactivemongo.play.json._
 import collection._
+import models.TodoItem
 import play.api.mvc._
 import play.api.libs.json._
-import services.{ITodolistItemService, TodolistItemService}
+import services.{ITodoItemService, TodoItemService}
 
 @Singleton
 class HomeController @Inject() (
@@ -31,8 +32,8 @@ class HomeController @Inject() (
   def collection: Future[JSONCollection] =
     database.map(_.collection[JSONCollection]("todo-list-items"))
 
-  private val todolistItemService: ITodolistItemService =
-    new TodolistItemService()
+  private val todolistItemService: ITodoItemService =
+    new TodoItemService()
 
   //GET
   def index(): Action[AnyContent] =
@@ -48,7 +49,7 @@ class HomeController @Inject() (
   def addItem(): Action[JsValue] =
     Action.async(parse.json) { implicit request: Request[JsValue] =>
       request.body
-        .validate[TodolistItem]
+        .validate[TodoItem]
         .map { item =>
           collection
             .flatMap(_.insert.one(item))

@@ -1,10 +1,9 @@
 package models
 
-import java.time.{LocalDateTime, LocalTime}
+import java.time.LocalDateTime
 import java.util.UUID
-
 import play.api.libs.functional.syntax.{toFunctionalBuilderOps, unlift}
-import play.api.libs.json.{JsObject, JsPath, Json, OFormat, Reads, Writes}
+import play.api.libs.json.{JsPath, OWrites, Reads}
 
 case class TodoItem(
     uuid: UUID = UUID.randomUUID(),
@@ -15,10 +14,10 @@ case class TodoItem(
 )
 
 object TodoItem {
-  implicit val todoItemWrites: Writes[TodoItem] = (
+  implicit val todoItemOWrites: OWrites[TodoItem] = (
     (JsPath \ "uuid").write[UUID] and
       (JsPath \ "name").write[String] and
-      (JsPath \ "is_completed")[Boolean] and
+      (JsPath \ "is_completed").write[Boolean] and
       (JsPath \ "created_at").write[LocalDateTime] and
       (JsPath \ "updated_at").write[LocalDateTime]
   )(unlift(TodoItem.unapply))
