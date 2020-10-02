@@ -26,20 +26,17 @@ class TodolistItemDAO extends DAO[TodolistItem] {
       .map(_.collection[JSONCollection]("todo-list-items"))
   }
 
-  def getAll: Future[List[TodolistItem]] = {
-    // get a cursor over not deleted items from MongoDB
-    val cursor: Future[Cursor[TodolistItem]] = collection
+  def getAll: Future[List[TodolistItem]] =
+    collection
       .map {
         _.find(
-          Json.obj("isDeleted" -> false),
+          Json.obj(),
           projection = Option.empty[TodolistItem]
         ).cursor[TodolistItem](ReadPreference.primary)
       }
-    // gather JsObjects from the db in a list
-    cursor.flatMap(
-      _.collect[List](-1, Cursor.FailOnError[List[TodolistItem]]())
-    )
-  }
+      .flatMap(
+        _.collect[List](-1, Cursor.FailOnError[List[TodolistItem]]())
+      )
   def get(uuid: UUID): Option[TodolistItem] = ???
   def save(t: TodolistItem): Future[UpdateWriteResult] = ???
   def update(t: TodolistItem): Future[UpdateWriteResult] = ???
