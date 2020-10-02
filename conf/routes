@@ -4,10 +4,10 @@
 # ~~~~
 
 # Home page
-GET     /                           controllers.HomeController.index
+GET     /                           controllers.HomeController.index()
 # Disable CSRF protection for develop environment
 + nocsrf
-POST    /addItem                    controllers.HomeController.addItem
-DELETE /removeItem                  controllers.HomeController.removeItem
+POST    /addItem                    controllers.HomeController.addItem()
+#DELETE /removeItem                  controllers.HomeController.removeItem
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)
