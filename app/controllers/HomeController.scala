@@ -16,7 +16,7 @@ import reactivemongo.play.json._
 import collection._
 import play.api.mvc._
 import play.api.libs.json._
-import services.TodolistItemService
+import services.{ITodolistItemService, TodolistItemService}
 
 @Singleton
 class HomeController @Inject() (
@@ -31,7 +31,8 @@ class HomeController @Inject() (
   def collection: Future[JSONCollection] =
     database.map(_.collection[JSONCollection]("todo-list-items"))
 
-  private val todolistItemService = new TodolistItemService()
+  private val todolistItemService: ITodolistItemService =
+    new TodolistItemService()
 
   //GET
   def index(): Action[AnyContent] =
