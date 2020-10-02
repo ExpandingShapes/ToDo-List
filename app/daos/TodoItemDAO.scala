@@ -1,14 +1,16 @@
 package daos
 
 import java.util.UUID
-import play.api.libs.json.Format.GenericFormat
-import play.api.libs.json.Json
-import reactivemongo.api.{Cursor, MongoConnection, ReadPreference}
-import reactivemongo.play.json.collection.Helpers.idWrites
+
+import reactivemongo.api.{Cursor, MongoConnection}
+
 import scala.concurrent.ExecutionContext.Implicits.global
 import models.TodoItem
+import reactivemongo.api.bson.collection.BSONCollection
+import reactivemongo.api.bson.compat.toDocumentWriter
 import reactivemongo.api.commands.UpdateWriteResult
-import reactivemongo.play.json.collection.JSONCollection
+import reactivemongo.bson.BSONDocument
+
 import scala.concurrent.Future
 
 class TodoItemDAO extends DAO[TodoItem] {
@@ -20,23 +22,20 @@ class TodoItemDAO extends DAO[TodoItem] {
       connection <- driver.connect(parsedUri)
     } yield connection
 
-  private def collection: Future[JSONCollection] = {
+  private def collection: Future[BSONCollection] =
     connection
       .flatMap(_.database("Mongo-Exercises"))
-      .map(_.collection[JSONCollection]("todo-list-items"))
+      .map(_.collection[BSONCollection]("todo-list-items"))
+
+  def getAll: Future[List[BSONDocument]] = {
+    collection
+      .flatMap(
+        _.find(BSONDocument())
+          .cursor[BSONDocument]()
+          .collect[List](-1, Cursor.FailOnError[List[BSONDocument]]())
+      )
   }
 
-  def getAll: Future[List[TodoItem]] =
-    collection
-      .map {
-        _.find(
-          Json.obj(),
-          projection = Option.empty[TodoItem]
-        ).cursor[TodoItem](ReadPreference.primary)
-      }
-      .flatMap(
-        _.collect[List](-1, Cursor.FailOnError[List[TodoItem]]())
-      )
   def get(uuid: UUID): Option[TodoItem] = ???
   def save(t: TodoItem): Future[UpdateWriteResult] = ???
   def update(t: TodoItem): Future[UpdateWriteResult] = ???

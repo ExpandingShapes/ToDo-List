@@ -32,14 +32,14 @@ class HomeController @Inject() (
   def collection: Future[JSONCollection] =
     database.map(_.collection[JSONCollection]("todo-list-items"))
 
-  private val todolistItemService: ITodoItemService =
+  private val todoItemService: ITodoItemService =
     new TodoItemService()
 
   //GET
   def index(): Action[AnyContent] =
     Action.async { implicit request: Request[AnyContent] =>
       {
-        todolistItemService.getAllItems.map { items =>
+        todoItemService.getAllItems.map { items =>
           Ok(views.html.index(items.reverse))
         }
       }
