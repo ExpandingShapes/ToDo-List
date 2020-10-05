@@ -1,13 +1,6 @@
-# Routes
-# This file defines all application routes (Higher priority routes first)
-# https://www.playframework.com/documentation/latest/ScalaRouting
-# ~~~~
-
 # Home page
 GET     /                           controllers.HomeController.index()
 # Disable CSRF protection for develop environment
 + nocsrf
 POST    /addItem                    controllers.HomeController.addItem()
 #DELETE /removeItem                  controllers.HomeController.removeItem
-# Map static resources from the /public folder to the /assets URL path
-GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)
