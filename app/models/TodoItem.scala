@@ -1,11 +1,13 @@
 package models
 
 import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import java.util.UUID
+
 import play.api.libs.functional.syntax.{toFunctionalBuilderOps, unlift}
 import play.api.libs.json.{JsPath, OWrites, Reads}
 import reactivemongo.api.bson._
-
+//import reactivemongo.bson.Macros
 import scala.util.Try
 
 case class TodoItem(
@@ -38,14 +40,16 @@ object TodoItem {
         uuid <- bson.getAsTry[String]("uuid")
         name <- bson.getAsTry[String]("name")
         isCompleted <- bson.getAsTry[Boolean]("is_completed")
-        createdAt <- bson.getAsTry[LocalDateTime]("created_at")
-        updatedAt <- bson.getAsTry[LocalDateTime]("updated_at")
+        createdAt <- bson.getAsTry[String]("created_at")
+        updatedAt <- bson.getAsTry[String]("updated_at")
       } yield TodoItem(
         UUID.fromString(uuid),
         name,
         isCompleted,
-        createdAt,
-        updatedAt
+        LocalDateTime
+          .parse(createdAt.toString, DateTimeFormatter.ISO_LOCAL_DATE_TIME),
+        LocalDateTime
+          .parse(updatedAt.toString, DateTimeFormatter.ISO_LOCAL_DATE_TIME)
       )
     }
   }
@@ -56,8 +60,10 @@ object TodoItem {
         "uuid" -> item.uuid.toString,
         "name" -> item.name,
         "is_completed" -> item.isCompleted,
-        "created_at" -> item.createdAt,
-        "updated_at" -> item.updatedAt
+        "created_at" -> item.createdAt.toString,
+        "updated_at" -> item.updatedAt.toString
       )
     }
+
+  //implicit val writer: BSONDocumentWriter[TodoItem] = Macros.writer[TodoItem]
 }

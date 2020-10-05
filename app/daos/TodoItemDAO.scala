@@ -1,44 +1,65 @@
 package daos
 
 import java.util.UUID
-
-import reactivemongo.api.{Cursor, MongoConnection}
-
-import scala.concurrent.ExecutionContext.Implicits.global
+import javax.inject.Inject
+import reactivemongo.api.Cursor
 import models.TodoItem
+import play.modules.reactivemongo.ReactiveMongoApi
 import reactivemongo.api.bson.collection.BSONCollection
-import reactivemongo.api.bson.compat.toDocumentWriter
-import reactivemongo.api.commands.UpdateWriteResult
-import reactivemongo.bson.BSONDocument
+import reactivemongo.api.commands.WriteResult
+import reactivemongo.api.bson.BSONDocument
+import scala.concurrent.{ExecutionContext, Future}
 
-import scala.concurrent.Future
-
-class TodoItemDAO extends DAO[TodoItem] {
-  private val driver = new reactivemongo.api.AsyncDriver
-  private val uri = "mongodb://admin:admin@127.0.0.1:27017/Mongo-Exercises"
-  private def connection: Future[MongoConnection] =
-    for {
-      parsedUri <- MongoConnection.fromString(uri)
-      connection <- driver.connect(parsedUri)
-    } yield connection
+class TodoItemDAO @Inject() (implicit
+    ec: ExecutionContext,
+    reactiveMongoApi: ReactiveMongoApi
+) extends DAO[TodoItem] {
 
   private def collection: Future[BSONCollection] =
-    connection
-      .flatMap(_.database("Mongo-Exercises"))
-      .map(_.collection[BSONCollection]("todo-list-items"))
+    reactiveMongoApi.database.map(_.collection("todo-list-items"))
 
-  def getAll: Future[List[BSONDocument]] = {
+  def getAll: Future[Seq[TodoItem]] = {
     collection
       .flatMap(
-        _.find(BSONDocument())
-          .cursor[BSONDocument]()
-          .collect[List](-1, Cursor.FailOnError[List[BSONDocument]]())
+        _.find(BSONDocument.empty, Option.empty[BSONDocument])
+          .cursor[TodoItem]()
+          .collect[Seq](-1, Cursor.FailOnError[Seq[TodoItem]]())
       )
   }
 
-  def get(uuid: UUID): Option[TodoItem] = ???
-  def save(t: TodoItem): Future[UpdateWriteResult] = ???
-  def update(t: TodoItem): Future[UpdateWriteResult] = ???
-  def delete(t: TodoItem): Future[UpdateWriteResult] = ???
+  def getById(uuid: UUID): Future[Option[TodoItem]] =
+    collection.flatMap(
+      _.find(BSONDocument("uuid" -> uuid.toString), Option.empty[BSONDocument])
+        .one[TodoItem]
+    )
 
+  def create(t: TodoItem): Future[WriteResult] =
+    collection.flatMap(_.insert.one(t.copy()))
+
+  def update(t: TodoItem): Future[Option[TodoItem]] = {
+    val updateModifier = BSONDocument(
+      f"$$set" -> BSONDocument(
+        "uuid" -> t.uuid.toString,
+        "name" -> t.name,
+        "is_completed" -> t.isCompleted,
+        "created_at" -> t.createdAt, //toStr?
+        "updated_at" -> t.updatedAt
+      )
+    )
+
+    collection
+      .flatMap(
+        _.findAndUpdate(
+          BSONDocument("uuid" -> t.uuid.toString),
+          updateModifier,
+          fetchNewObject = true
+        )
+      )
+      .map(_.result[TodoItem])
+  }
+  def delete(uuid: UUID): Future[Option[TodoItem]] =
+    collection.flatMap(
+      _.findAndRemove(selector = BSONDocument("uuid" -> uuid.toString))
+        .map(_.result[TodoItem])
+    )
 }

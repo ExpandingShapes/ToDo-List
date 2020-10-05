@@ -1,26 +1,28 @@
 package services
 
 import java.util.UUID
-
 import daos.TodoItemDAO
+import javax.inject.Inject
 import models.TodoItem
-import reactivemongo.bson.BSONDocument
 import scala.concurrent.Future
+import reactivemongo.api.commands.WriteResult
 
 trait ITodoItemService {
-  def getItem(uuid: UUID): Option[TodoItem]
-  def getAllItems: Future[List[BSONDocument]]
-  def saveItem(todolistItem: TodoItem): Int
-  def updateItem(todolistItem: TodoItem): Int
-  def deleteItem(uuid: UUID): Int
+  def getItem(uuid: UUID): Future[Option[TodoItem]]
+  def getAllItems: Future[Seq[TodoItem]]
+  def createItem(todolistItem: TodoItem): Future[WriteResult]
+  def updateItem(todolistItem: TodoItem): Future[Option[TodoItem]]
+  def deleteItem(uuid: UUID): Future[Option[TodoItem]]
 }
 
-class TodoItemService extends ITodoItemService {
-  val todolistItemDAO: TodoItemDAO = new TodoItemDAO
-
-  def getItem(uuid: UUID): Option[TodoItem] = ???
-  def getAllItems: Future[List[BSONDocument]] = todolistItemDAO.getAll
-  def saveItem(todolistItem: TodoItem): Int = ???
-  def updateItem(todolistItem: TodoItem): Int = ???
-  def deleteItem(uuid: UUID): Int = ???
+class TodoItemService @Inject() (todoItemDAO: TodoItemDAO)
+    extends ITodoItemService {
+  def getItem(uuid: UUID): Future[Option[TodoItem]] = todoItemDAO.getById(uuid)
+  def getAllItems: Future[Seq[TodoItem]] = todoItemDAO.getAll
+  def createItem(todoItem: TodoItem): Future[WriteResult] =
+    todoItemDAO.create(todoItem)
+  def updateItem(todoItem: TodoItem): Future[Option[TodoItem]] =
+    todoItemDAO.update(todoItem)
+  def deleteItem(uuid: UUID): Future[Option[TodoItem]] =
+    todoItemDAO.delete(uuid)
 }
