@@ -4,6 +4,9 @@ import java.time.LocalDateTime
 import java.util.UUID
 import play.api.libs.functional.syntax.{toFunctionalBuilderOps, unlift}
 import play.api.libs.json.{JsPath, OWrites, Reads}
+import reactivemongo.api.bson._
+
+import scala.util.Try
 
 case class TodoItem(
     uuid: UUID = UUID.randomUUID(),
@@ -28,4 +31,33 @@ object TodoItem {
       (JsPath \ "created_at").read[LocalDateTime] and
       (JsPath \ "updated_at").read[LocalDateTime]
   )(TodoItem.apply _)
+
+  implicit object TodoItemReader extends BSONDocumentReader[TodoItem] {
+    def readDocument(bson: BSONDocument): Try[TodoItem] = {
+      for {
+        uuid <- bson.getAsTry[String]("uuid")
+        name <- bson.getAsTry[String]("name")
+        isCompleted <- bson.getAsTry[Boolean]("is_completed")
+        createdAt <- bson.getAsTry[LocalDateTime]("created_at")
+        updatedAt <- bson.getAsTry[LocalDateTime]("updated_at")
+      } yield TodoItem(
+        UUID.fromString(uuid),
+        name,
+        isCompleted,
+        createdAt,
+        updatedAt
+      )
+    }
+  }
+
+  implicit val writeDocument: BSONDocumentWriter[TodoItem] =
+    BSONDocumentWriter[TodoItem] { item =>
+      BSONDocument(
+        "uuid" -> item.uuid.toString,
+        "name" -> item.name,
+        "is_completed" -> item.isCompleted,
+        "created_at" -> item.createdAt,
+        "updated_at" -> item.updatedAt
+      )
+    }
 }
