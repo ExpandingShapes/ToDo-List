@@ -4,18 +4,17 @@ import java.util.UUID
 
 import javax.inject._
 import models.TodoItem
-import models.TodoItem._
+import models.TodoItem.{todoItemOWrites, _}
 
 import scala.concurrent.{ExecutionContext, Future}
 import play.api.Logger
-import play.api.mvc.{AbstractController, ControllerComponents}
+import play.api.mvc.{AbstractController, ControllerComponents, Request, _}
 import play.modules.reactivemongo.{
   MongoController,
   ReactiveMongoApi,
   ReactiveMongoComponents
 }
 import reactivemongo.play.json._
-import play.api.mvc._
 import play.api.libs.json._
 import services.TodoItemService
 
@@ -59,8 +58,8 @@ class HomeController @Inject() (
 
   //POST
   def addTodoItem(): Action[JsValue] =
-    Action.async(parse.json) {
-      _.body
+    Action.async(parse.json) { request: Request[JsValue] =>
+      request.body
         .validate[TodoItem]
         .map { item =>
           todoItemService.createItem(item).map { _ =>
@@ -68,6 +67,20 @@ class HomeController @Inject() (
           }
         }
         .getOrElse(Future.successful(BadRequest("Received invalid JSON")))
+    }
+
+  def updateTodoItem(): Action[JsValue] =
+    Action.async(parse.json) { request: Request[JsValue] =>
+      request.body
+        .validate[TodoItem]
+        .map { item =>
+          todoItemService.updateItem(item).map {
+            case Some(value) => Ok(Json.toJson(item))
+            case None        => NotFound
+          }
+        }
+        .getOrElse(Future.successful(BadRequest("Received bad JSON")))
+
     }
 
   //DELETE

@@ -42,8 +42,8 @@ class TodoItemDAO @Inject() (implicit
         "uuid" -> t.uuid.toString,
         "name" -> t.name,
         "is_completed" -> t.isCompleted,
-        "created_at" -> t.createdAt, //toStr?
-        "updated_at" -> t.updatedAt
+        "created_at" -> t.createdAt.toString,
+        "updated_at" -> t.updatedAt.toString
       )
     )
 

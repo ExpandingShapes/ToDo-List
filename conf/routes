@@ -1,7 +1,8 @@
 GET     /                           controllers.HomeController.getAllTodoItems()
-+ nocsrf
 GET     /getItem                    controllers.HomeController.getTodoItem()
 # Disable CSRF protection for develop environment
 + nocsrf
 POST    /addItem                    controllers.HomeController.addTodoItem()
-#DELETE /removeItem                  controllers.HomeController.removeItem
++ nocsrf
+PATCH   /updateItem                 controllers.HomeController.updateTodoItem()
+#DELETE /removeItem                 controllers.HomeController.removeItem
