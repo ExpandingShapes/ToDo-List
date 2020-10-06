@@ -1,8 +1,11 @@
 package controllers
 
 import java.util.UUID
+
 import javax.inject._
+import models.TodoItem
 import models.TodoItem._
+
 import scala.concurrent.{ExecutionContext, Future}
 import play.api.Logger
 import play.api.mvc.{AbstractController, ControllerComponents}
@@ -53,48 +56,19 @@ class HomeController @Inject() (
         }
       }
     }
-//          .getOrElse(BadRequest("Your JSON is bad!")) match {
-//          case Some(value) =>
-//            val uuid = UUID.fromString(value.toString)
-//            logger.info(uuid.toString)
-//            todoItemService.getItem(uuid).map { item =>
-//              item
-//                .map { i =>
-//                  Ok(Json.toJson(i))
-//                }
-//                .getOrElse(NotFound)
-//            }
-//          case None => Future.successful(BadRequest)
-//        }
-
-//      }
-
-//    }
-//  Action.async { implicit request: Request[AnyContent] =>
-//    {
-//      todoItemService.getAllItems.map { items =>
-//        (items.reverse)
-//      }
-//    }
-  //}
 
   //POST
-  def addTodoItem() = Action { Ok("") }
-//    Action.async(parse.json) { implicit request: Request[JsValue] =>
-//      request.body
-//        .validate[TodoItem]
-//        .map { item =>
-//          collection
-//            .flatMap(_.insert.one(item))
-//            .map { lastError =>
-//              logger.debug(s"Successfully inserted with LastError: $lastError")
-//              Created(
-//                Json.obj("uuid" -> item.uuid.toString)
-//              )
-//            }
-//        }
-//        .getOrElse(Future.successful(BadRequest("invalid json")))
-//    }
+  def addTodoItem(): Action[JsValue] =
+    Action.async(parse.json) {
+      _.body
+        .validate[TodoItem]
+        .map { item =>
+          todoItemService.createItem(item).map { _ =>
+            Created
+          }
+        }
+        .getOrElse(Future.successful(BadRequest("Received invalid JSON")))
+    }
 
   //DELETE
   def removeItem(): Status = NotImplemented
