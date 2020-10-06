@@ -1,8 +1,9 @@
+# CSRF protection disabled for mutating methods due to develop environment
 GET     /                           controllers.HomeController.getAllTodoItems()
-GET     /getItem                    controllers.HomeController.getTodoItem()
-# Disable CSRF protection for develop environment
+GET     /getItem                    controllers.HomeController.getTodoItem(uuid: java.util.UUID)
 + nocsrf
 POST    /addItem                    controllers.HomeController.addTodoItem()
 + nocsrf
 PATCH   /updateItem                 controllers.HomeController.updateTodoItem()
-#DELETE /removeItem                 controllers.HomeController.removeItem
++ nocsrf
+DELETE  /removeItem                 controllers.HomeController.removeItem(uuid: java.util.UUID)

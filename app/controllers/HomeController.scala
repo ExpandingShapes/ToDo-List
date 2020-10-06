@@ -37,26 +37,16 @@ class HomeController @Inject() (
       }
     }
 
-  def getTodoItem: Action[AnyContent] =
+  def getTodoItem(uuid: UUID): Action[AnyContent] =
     Action.async { implicit request: Request[AnyContent] =>
       {
-        val jsonBody = request.body.asJson
-        jsonBody match {
-          case Some(value) =>
-            val uuid = (value \ "uuid").as[UUID]
-            todoItemService.getItem(uuid).map { item =>
-              item
-                .map { i =>
-                  Ok(Json.toJson(i))
-                }
-                .getOrElse(NotFound)
-            }
-          case None => Future.successful(BadRequest)
+        todoItemService.getItem(uuid).map {
+          case Some(value) => Ok(Json.toJson(value))
+          case None        => NotFound
         }
       }
     }
 
-  //POST
   def addTodoItem(): Action[JsValue] =
     Action.async(parse.json) { request: Request[JsValue] =>
       request.body
@@ -80,28 +70,13 @@ class HomeController @Inject() (
           }
         }
         .getOrElse(Future.successful(BadRequest("Received bad JSON")))
-
     }
 
-  //DELETE
-  def removeItem(): Status = NotImplemented
-//  Action.async(parse.json) { implicit request: Request[JsValue] =>
-//    {
-//      //TODO: match validate result
-//      val uuid: String = request.body.validate[String] //.getOrElse("")
-//      val selector = Json.obj("uuid" -> uuid)
-//      val updatedField = Json.obj("isDeleted" -> true)
-//      collection
-//        .flatMap(
-//          _.update.one(selector, updatedField, upsert = false, multi = false)
-//        )
-//        .onComplete {
-//          case Failure(exception) =>
-//            logger.debug(exception.toString)
-//            InternalServerError
-//          case Success(value) => NoContent
-//        }
-//    }
-//  }
-
+  def removeItem(uuid: UUID): Action[AnyContent] =
+    Action.async {
+      todoItemService.deleteItem(uuid).map {
+        case Some(value) => Ok(Json.toJson(value))
+        case None        => NotFound
+      }
+    }
 }
