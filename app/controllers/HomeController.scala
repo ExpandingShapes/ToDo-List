@@ -8,6 +8,7 @@ import models.TodoItem.{todoItemOWrites, _}
 
 import scala.concurrent.{ExecutionContext, Future}
 import play.api.Logger
+import play.api.libs.json.JsPath.\
 import play.api.mvc.{AbstractController, ControllerComponents, Request, _}
 import play.modules.reactivemongo.{
   MongoController,
@@ -73,8 +74,18 @@ class HomeController @Inject() (
         }
         .getOrElse(Future.successful(BadRequest("Received bad JSON")))
     }
-//TODO
-  def updateAllTodoItems(): Status = Ok
+
+  //TODO: bad name
+  def updateAllTodoItems(): Action[JsValue] =
+    Action.async(parse.json) { request =>
+      {
+        //TODO:Error handling?
+        val isCompleted: Boolean = (request.body \ "is_completed").as[Boolean]
+        todoItemService.updateAllItems(isCompleted).map { _ =>
+          NoContent
+        }
+      }
+    }
 
   def removeItem(uuid: UUID): Action[AnyContent] =
     Action.async {

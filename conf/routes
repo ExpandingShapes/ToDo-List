@@ -1,12 +1,12 @@
 # CSRF protection disabled for mutating methods due to develop environment
 GET     /api/todo-items             controllers.HomeController.getAllTodoItems()
-GET     /api/todo-item              controllers.HomeController.getTodoItem(uuid: java.util.UUID)
+GET     /api/todo-items/:uuid              controllers.HomeController.getTodoItem(uuid: java.util.UUID)
 + nocsrf
 POST    /api/todo-item              controllers.HomeController.addTodoItem()
 + nocsrf
 PUT     /api/todo-item              controllers.HomeController.updateTodoItem()
-#+ nocsrf
-#PATCH   /api/todo-items             controllers.HomeController.updateAllTodoItems()
++ nocsrf
+PATCH   /api/todo-items/is-completed  controllers.HomeController.updateAllTodoItems()
 + nocsrf
 DELETE  /api/todo-item              controllers.HomeController.removeItem(uuid: java.util.UUID)
 + nocsrf

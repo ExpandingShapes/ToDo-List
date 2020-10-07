@@ -11,5 +11,6 @@ trait DAO[T] {
   def getAll: Future[Seq[T]]
   def create(t: T): Future[WriteResult]
   def update(t: T): Future[Option[T]]
+  //TODO: add updateAll method
   def delete(uuid: UUID): Future[Option[T]]
 }

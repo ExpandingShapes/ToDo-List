@@ -7,7 +7,12 @@ import reactivemongo.api.Cursor
 import models.TodoItem
 import play.modules.reactivemongo.ReactiveMongoApi
 import reactivemongo.api.bson.collection.BSONCollection
-import reactivemongo.api.commands.{MultiBulkWriteResult, WriteResult}
+import reactivemongo.api.commands.{
+  MultiBulkWriteResult,
+  UpdateWriteResult,
+  WriteConcern,
+  WriteResult
+}
 import reactivemongo.api.bson.BSONDocument
 import reactivemongo.api.bson.compat.{legacyWriterNewValue, toDocumentWriter}
 
@@ -59,6 +64,20 @@ class TodoItemDAO @Inject() (implicit
         )
       )
       .map(_.result[TodoItem])
+  }
+
+  def updateAll(isCompleted: Boolean): Future[UpdateWriteResult] = {
+    collection.flatMap { c =>
+      c.update.one(
+        q = BSONDocument.empty,
+        u =
+          BSONDocument(f"$$set" -> BSONDocument("is_completed" -> isCompleted)),
+        upsert = false,
+        multi = true,
+        collation = None,
+        arrayFilters = Seq.empty
+      )
+    }
   }
 
   def delete(uuid: UUID): Future[Option[TodoItem]] =

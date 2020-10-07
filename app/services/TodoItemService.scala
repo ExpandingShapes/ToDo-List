@@ -1,11 +1,13 @@
 package services
 
 import java.util.UUID
+
 import daos.TodoItemDAO
 import javax.inject.Inject
 import models.TodoItem
+
 import scala.concurrent.Future
-import reactivemongo.api.commands.WriteResult
+import reactivemongo.api.commands.{UpdateWriteResult, WriteResult}
 
 trait ITodoItemService {
   def getItem(uuid: UUID): Future[Option[TodoItem]]
@@ -24,6 +26,8 @@ class TodoItemService @Inject() (todoItemDAO: TodoItemDAO)
     todoItemDAO.create(todoItem)
   def updateItem(todoItem: TodoItem): Future[Option[TodoItem]] =
     todoItemDAO.update(todoItem)
+  def updateAllItems(isCompleted: Boolean): Future[UpdateWriteResult] =
+    todoItemDAO.updateAll(isCompleted)
   def deleteItem(uuid: UUID): Future[Option[TodoItem]] =
     todoItemDAO.delete(uuid)
   def deleteAllItems(): Future[WriteResult] = todoItemDAO.deleteAll()
