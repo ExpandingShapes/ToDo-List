@@ -72,6 +72,8 @@ class HomeController @Inject() (
         .getOrElse(Future.successful(BadRequest("Received bad JSON")))
     }
 
+  def updateAllTodoItems() = NotImplemented
+
   def removeItem(uuid: UUID): Action[AnyContent] =
     Action.async {
       todoItemService.deleteItem(uuid).map {
@@ -79,4 +81,6 @@ class HomeController @Inject() (
         case None        => NotFound
       }
     }
+
+  def removeAllTodoItems() = NotImplemented
 }
