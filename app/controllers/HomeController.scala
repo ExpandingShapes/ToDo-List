@@ -18,6 +18,8 @@ import reactivemongo.play.json._
 import play.api.libs.json._
 import services.TodoItemService
 
+import scala.util.{Failure, Success}
+
 @Singleton
 class HomeController @Inject() (
     override val controllerComponents: ControllerComponents,
@@ -71,8 +73,8 @@ class HomeController @Inject() (
         }
         .getOrElse(Future.successful(BadRequest("Received bad JSON")))
     }
-
-  def updateAllTodoItems() = NotImplemented
+//TODO
+  def updateAllTodoItems(): Status = Ok
 
   def removeItem(uuid: UUID): Action[AnyContent] =
     Action.async {
@@ -82,5 +84,10 @@ class HomeController @Inject() (
       }
     }
 
-  def removeAllTodoItems() = NotImplemented
+  def removeAllTodoItems(): Action[AnyContent] =
+    Action.async {
+      todoItemService.deleteAllItems().map { _ =>
+        NoContent
+      }
+    }
 }

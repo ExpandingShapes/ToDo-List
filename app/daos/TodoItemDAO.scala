@@ -1,13 +1,16 @@
 package daos
 
 import java.util.UUID
+
 import javax.inject.Inject
 import reactivemongo.api.Cursor
 import models.TodoItem
 import play.modules.reactivemongo.ReactiveMongoApi
 import reactivemongo.api.bson.collection.BSONCollection
-import reactivemongo.api.commands.WriteResult
+import reactivemongo.api.commands.{MultiBulkWriteResult, WriteResult}
 import reactivemongo.api.bson.BSONDocument
+import reactivemongo.api.bson.compat.{legacyWriterNewValue, toDocumentWriter}
+
 import scala.concurrent.{ExecutionContext, Future}
 
 class TodoItemDAO @Inject() (implicit
@@ -57,9 +60,16 @@ class TodoItemDAO @Inject() (implicit
       )
       .map(_.result[TodoItem])
   }
+
   def delete(uuid: UUID): Future[Option[TodoItem]] =
     collection.flatMap(
       _.findAndRemove(selector = BSONDocument("uuid" -> uuid.toString))
         .map(_.result[TodoItem])
     )
+
+  def deleteAll(): Future[WriteResult] =
+    for {
+      deleteBuilder <- collection.map(c => c.delete(ordered = false))
+      result <- deleteBuilder.one(BSONDocument.empty, None, None)
+    } yield result
 }

@@ -5,8 +5,8 @@ GET     /api/todo-item              controllers.HomeController.getTodoItem(uuid:
 POST    /api/todo-item              controllers.HomeController.addTodoItem()
 + nocsrf
 PUT     /api/todo-item              controllers.HomeController.updateTodoItem()
-+ nocsrf
-PATCH   /api/todo-items             controllers.HomeController.updateAllTodoItems()
+#+ nocsrf
+#PATCH   /api/todo-items             controllers.HomeController.updateAllTodoItems()
 + nocsrf
 DELETE  /api/todo-item              controllers.HomeController.removeItem(uuid: java.util.UUID)
 + nocsrf

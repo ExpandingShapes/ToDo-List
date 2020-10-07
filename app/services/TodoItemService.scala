@@ -13,6 +13,7 @@ trait ITodoItemService {
   def createItem(todolistItem: TodoItem): Future[WriteResult]
   def updateItem(todolistItem: TodoItem): Future[Option[TodoItem]]
   def deleteItem(uuid: UUID): Future[Option[TodoItem]]
+  def deleteAllItems(): Future[WriteResult]
 }
 
 class TodoItemService @Inject() (todoItemDAO: TodoItemDAO)
@@ -25,4 +26,6 @@ class TodoItemService @Inject() (todoItemDAO: TodoItemDAO)
     todoItemDAO.update(todoItem)
   def deleteItem(uuid: UUID): Future[Option[TodoItem]] =
     todoItemDAO.delete(uuid)
+  def deleteAllItems(): Future[WriteResult] = todoItemDAO.deleteAll()
+
 }
