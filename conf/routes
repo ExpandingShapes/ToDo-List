@@ -8,6 +8,6 @@ PUT     /api/todo-item                controllers.HomeController.updateTodoItem(
 + nocsrf
 PATCH   /api/todo-items/is-completed  controllers.HomeController.updateAllTodoItems()
 + nocsrf
-DELETE  /api/todo-item                controllers.HomeController.removeItem(uuid: java.util.UUID)
+DELETE  /api/todo-item/:uuid          controllers.HomeController.removeTodoItem(uuid: java.util.UUID)
 + nocsrf
 DELETE  /api/todo-items               controllers.HomeController.removeAllTodoItems()

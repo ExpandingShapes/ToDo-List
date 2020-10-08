@@ -96,7 +96,7 @@ class HomeController @Inject() (
       }
     }
 
-  def removeItem(uuid: UUID): Action[AnyContent] =
+  def removeTodoItem(uuid: UUID): Action[AnyContent] =
     Action.async {
       todoItemService.deleteItem(uuid).map {
         case Some(value) => Ok(Json.toJson(value))
