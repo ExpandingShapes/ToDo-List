@@ -1,11 +1,13 @@
 package controllers
 
 import java.util.UUID
+
 import javax.inject._
+
 import scala.concurrent.{ExecutionContext, Future}
 import models.TodoItem
 import play.api.libs.json._
-import play.api.Logger
+import play.api.Logging
 import play.api.mvc._
 import play.modules.reactivemongo.{
   MongoController,
@@ -21,9 +23,9 @@ class HomeController @Inject() (
     todoItemService: TodoItemService
 ) extends AbstractController(controllerComponents)
     with MongoController
-    with ReactiveMongoComponents {
+    with ReactiveMongoComponents
+    with Logging {
 
-  val logger: Logger = Logger(this.getClass)
   implicit def ec: ExecutionContext = controllerComponents.executionContext
 
   def getAllTodoItems: Action[AnyContent] =
@@ -38,7 +40,9 @@ class HomeController @Inject() (
       {
         todoItemService.getItem(uuid).map {
           case Some(value) => Ok(Json.toJson(value))
-          case None        => NotFound
+          case None =>
+            logger.debug(s"todoItem with uuid = $uuid not found")
+            NotFound
         }
       }
     }
@@ -52,7 +56,12 @@ class HomeController @Inject() (
             Created
           }
         }
-        .getOrElse(Future.successful(BadRequest("Received invalid JSON")))
+        .getOrElse {
+          logger.debug(
+            "Failed to create a new todoItem from JSON: \n $request.body"
+          )
+          Future.successful(BadRequest("Received invalid JSON"))
+        }
     }
 
   def updateTodoItem(): Action[JsValue] =
@@ -62,17 +71,24 @@ class HomeController @Inject() (
         .map { item =>
           todoItemService.updateItem(item).map {
             case Some(value) => Ok(Json.toJson(item))
-            case None        => NotFound
+            case None =>
+              logger.debug(
+                s"Failed to update a todoItem because no todoItem with uuid = ${item.uuid} found."
+              )
+              NotFound
           }
         }
-        .getOrElse(Future.successful(BadRequest("Received bad JSON")))
+        .getOrElse {
+          logger.debug(
+            s"Failed to create a new todoItem from JSON: \n $request.body"
+          )
+          Future.successful(BadRequest("Received bad JSON"))
+        }
     }
 
-  //TODO: bad name
   def updateAllTodoItems(): Action[JsValue] =
     Action.async(parse.json) { request =>
       {
-        //TODO:Error handling?
         val isCompleted: Boolean = (request.body \ "is_completed").as[Boolean]
         todoItemService.updateAllItems(isCompleted).map { _ =>
           NoContent
@@ -84,7 +100,11 @@ class HomeController @Inject() (
     Action.async {
       todoItemService.deleteItem(uuid).map {
         case Some(value) => Ok(Json.toJson(value))
-        case None        => NotFound
+        case None =>
+          logger.debug(
+            s"Failed to delete a todoItem, no todoItem with uuid = $uuid found."
+          )
+          NotFound
       }
     }
 
