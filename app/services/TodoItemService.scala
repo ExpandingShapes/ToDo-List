@@ -1,12 +1,10 @@
 package services
 
 import java.util.UUID
-
-import daos.TodoItemDAO
 import javax.inject.Inject
-import models.TodoItem
-
 import scala.concurrent.Future
+import daos.TodoItemDAO
+import models.TodoItem
 import reactivemongo.api.commands.{UpdateWriteResult, WriteResult}
 
 trait ITodoItemService {

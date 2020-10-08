@@ -64,6 +64,4 @@ object TodoItem {
         "updated_at" -> item.updatedAt.toString
       )
     }
-
-  //implicit val writer: BSONDocumentWriter[TodoItem] = Macros.writer[TodoItem]
 }

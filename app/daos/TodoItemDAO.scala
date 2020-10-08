@@ -1,22 +1,15 @@
 package daos
 
 import java.util.UUID
-
 import javax.inject.Inject
-import reactivemongo.api.Cursor
-import models.TodoItem
+import scala.concurrent.{ExecutionContext, Future}
 import play.modules.reactivemongo.ReactiveMongoApi
+import reactivemongo.api.Cursor
 import reactivemongo.api.bson.collection.BSONCollection
-import reactivemongo.api.commands.{
-  MultiBulkWriteResult,
-  UpdateWriteResult,
-  WriteConcern,
-  WriteResult
-}
+import reactivemongo.api.commands.{UpdateWriteResult, WriteResult}
 import reactivemongo.api.bson.BSONDocument
 import reactivemongo.api.bson.compat.{legacyWriterNewValue, toDocumentWriter}
-
-import scala.concurrent.{ExecutionContext, Future}
+import models.TodoItem
 
 class TodoItemDAO @Inject() (implicit
     ec: ExecutionContext,

@@ -1,25 +1,18 @@
 package controllers
 
 import java.util.UUID
-
 import javax.inject._
-import models.TodoItem
-import models.TodoItem.{todoItemOWrites, _}
-
 import scala.concurrent.{ExecutionContext, Future}
+import models.TodoItem
+import play.api.libs.json._
 import play.api.Logger
-import play.api.libs.json.JsPath.\
-import play.api.mvc.{AbstractController, ControllerComponents, Request, _}
+import play.api.mvc._
 import play.modules.reactivemongo.{
   MongoController,
   ReactiveMongoApi,
   ReactiveMongoComponents
 }
-import reactivemongo.play.json._
-import play.api.libs.json._
 import services.TodoItemService
-
-import scala.util.{Failure, Success}
 
 @Singleton
 class HomeController @Inject() (
