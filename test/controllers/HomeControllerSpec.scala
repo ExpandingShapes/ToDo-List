@@ -1,34 +1,26 @@
 package controllers
 
 import java.util.UUID
-import java.util.concurrent.TimeUnit
-
 import akka.stream.Materializer
-import akka.util.Timeout
 import models.TodoItem
 import org.mockito.Mockito.when
+import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play._
 import org.scalatestplus.play.guice._
-import play.api.mvc.{AnyContent, ControllerComponents, Results}
-import play.api.test._
-import play.api.test.Helpers._
-import org.scalatestplus.mockito.MockitoSugar
-import org.scalatestplus.mockito.MockitoSugar.mock
-import play.DefaultApplication
 import play.api.libs.json.Json
+import play.api.mvc.{AnyContent, ControllerComponents, Results}
+import play.api.test.Helpers._
+import play.api.test._
 import play.modules.reactivemongo.ReactiveMongoApi
 import reactivemongo.api.commands.{
   DefaultWriteResult,
   UpdateWriteResult,
   Upserted,
-  WriteError,
-  WriteResult
+  WriteError
 }
+import services.TodoItemService
 
 import scala.concurrent.Future
-//import play.mvc.BodyParser.AnyContent
-import services.TodoItemService
-import play.api.test.RouteInvokers
 
 class HomeControllerSpec
     extends PlaySpec
@@ -40,7 +32,6 @@ class HomeControllerSpec
   private val controllerComponents = mock[ControllerComponents]
   private val reactiveMongoApi = mock[ReactiveMongoApi]
   private val todoItemService = mock[TodoItemService]
-  private val application = mock[DefaultApplication]
   private val defaultWriteResultF = Future.successful(
     DefaultWriteResult(
       ok = true,
