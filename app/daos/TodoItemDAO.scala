@@ -39,7 +39,7 @@ class TodoItemDAO @Inject() (implicit
 
   def update(t: TodoItem): Future[Option[TodoItem]] = {
     val updateModifier = BSONDocument(
-      f"$$set" -> BSONDocument(
+      "$set" -> BSONDocument(
         "uuid" -> t.uuid.toString,
         "name" -> t.name,
         "is_completed" -> t.isCompleted,
