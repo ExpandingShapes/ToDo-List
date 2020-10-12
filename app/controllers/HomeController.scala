@@ -1,29 +1,19 @@
 package controllers
 
 import java.util.UUID
-
 import javax.inject._
-
 import scala.concurrent.{ExecutionContext, Future}
-import models.TodoItem
 import play.api.libs.json._
 import play.api.Logging
 import play.api.mvc._
-import play.modules.reactivemongo.{
-  MongoController,
-  ReactiveMongoApi,
-  ReactiveMongoComponents
-}
 import services.TodoItemService
+import models.TodoItem
 
 @Singleton
 class HomeController @Inject() (
     override val controllerComponents: ControllerComponents,
-    val reactiveMongoApi: ReactiveMongoApi,
     todoItemService: TodoItemService
 ) extends AbstractController(controllerComponents)
-    with MongoController
-    with ReactiveMongoComponents
     with Logging {
 
   implicit def ec: ExecutionContext = controllerComponents.executionContext

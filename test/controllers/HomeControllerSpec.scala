@@ -1,8 +1,8 @@
 package controllers
 
 import java.util.UUID
+import scala.concurrent.Future
 import akka.stream.Materializer
-import models.TodoItem
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play._
@@ -11,16 +11,14 @@ import play.api.libs.json.Json
 import play.api.mvc.{AnyContent, ControllerComponents, Results}
 import play.api.test.Helpers._
 import play.api.test._
-import play.modules.reactivemongo.ReactiveMongoApi
 import reactivemongo.api.commands.{
   DefaultWriteResult,
   UpdateWriteResult,
   Upserted,
   WriteError
 }
+import models.TodoItem
 import services.TodoItemService
-
-import scala.concurrent.Future
 
 class HomeControllerSpec
     extends PlaySpec
@@ -30,7 +28,6 @@ class HomeControllerSpec
     with MockitoSugar {
   private implicit lazy val materializer: Materializer = app.materializer
   private val controllerComponents = mock[ControllerComponents]
-  private val reactiveMongoApi = mock[ReactiveMongoApi]
   private val todoItemService = mock[TodoItemService]
   private val defaultWriteResultF = Future.successful(
     DefaultWriteResult(
@@ -61,7 +58,6 @@ class HomeControllerSpec
   private val controller = {
     new HomeController(
       controllerComponents,
-      reactiveMongoApi,
       todoItemService
     ) {
       override val controllerComponents: ControllerComponents =
