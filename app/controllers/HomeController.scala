@@ -1,6 +1,5 @@
 package controllers
 
-import java.util.UUID
 import javax.inject._
 import scala.concurrent.{ExecutionContext, Future}
 import play.api.libs.json._
@@ -25,13 +24,13 @@ class HomeController @Inject() (
       }
     }
 
-  def getTodoItem(uuid: UUID): Action[AnyContent] =
+  def getTodoItem(id: String): Action[AnyContent] =
     Action.async { implicit request: Request[AnyContent] =>
       {
-        todoItemService.getItem(uuid).map {
+        todoItemService.getItem(id).map {
           case Some(value) => Ok(Json.toJson(value))
           case None =>
-            logger.debug(s"todoItem with uuid = $uuid not found")
+            logger.debug(s"todoItem with id = $id not found")
             NotFound
         }
       }
@@ -63,7 +62,7 @@ class HomeController @Inject() (
             case Some(value) => Ok(Json.toJson(item))
             case None =>
               logger.debug(
-                s"Failed to update a todoItem because no todoItem with uuid = ${item.uuid} found."
+                s"Failed to update a todoItem because no todoItem with id = ${item.id} found."
               )
               NotFound
           }
@@ -86,13 +85,13 @@ class HomeController @Inject() (
       }
     }
 
-  def removeTodoItem(uuid: UUID): Action[AnyContent] =
+  def removeTodoItem(id: String): Action[AnyContent] =
     Action.async {
-      todoItemService.deleteItem(uuid).map {
+      todoItemService.deleteItem(id).map {
         case Some(value) => Ok(Json.toJson(value))
         case None =>
           logger.debug(
-            s"Failed to delete a todoItem, no todoItem with uuid = $uuid found."
+            s"Failed to delete a todoItem, no todoItem with id = $id found."
           )
           NotFound
       }

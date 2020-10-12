@@ -1,6 +1,5 @@
 package daos
 
-import java.util.UUID
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 import play.modules.reactivemongo.ReactiveMongoApi
@@ -28,9 +27,9 @@ class TodoItemDAO @Inject() (implicit
       )
   }
 
-  def getById(uuid: UUID): Future[Option[TodoItem]] =
+  def getById(id: String): Future[Option[TodoItem]] =
     collection.flatMap(
-      _.find(BSONDocument("uuid" -> uuid.toString), Option.empty[BSONDocument])
+      _.find(BSONDocument("id" -> id), Option.empty[BSONDocument])
         .one[TodoItem]
     )
 
@@ -40,18 +39,18 @@ class TodoItemDAO @Inject() (implicit
   def update(t: TodoItem): Future[Option[TodoItem]] = {
     val updateModifier = BSONDocument(
       "$set" -> BSONDocument(
-        "uuid" -> t.uuid.toString,
+        "id" -> t.id,
         "name" -> t.name,
         "is_completed" -> t.isCompleted,
-        "created_at" -> t.createdAt.toString,
-        "updated_at" -> t.updatedAt.toString
+        "created" -> t.created.toString,
+        "updated" -> t.updated.toString
       )
     )
 
     collection
       .flatMap(
         _.findAndUpdate(
-          BSONDocument("uuid" -> t.uuid.toString),
+          BSONDocument("id" -> t.id),
           updateModifier,
           fetchNewObject = true
         )
@@ -73,9 +72,9 @@ class TodoItemDAO @Inject() (implicit
     }
   }
 
-  def delete(uuid: UUID): Future[Option[TodoItem]] =
+  def delete(id: String): Future[Option[TodoItem]] =
     collection.flatMap(
-      _.findAndRemove(selector = BSONDocument("uuid" -> uuid.toString))
+      _.findAndRemove(selector = BSONDocument("id" -> id))
         .map(_.result[TodoItem])
     )
 
