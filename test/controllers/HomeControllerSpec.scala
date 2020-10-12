@@ -1,6 +1,7 @@
 package controllers
 
 import java.util.UUID
+
 import scala.concurrent.Future
 import akka.stream.Materializer
 import org.mockito.Mockito.when
@@ -18,6 +19,7 @@ import reactivemongo.api.commands.{
   WriteError
 }
 import models.TodoItem
+import org.joda.time.DateTime
 import services.TodoItemService
 
 class HomeControllerSpec
@@ -91,14 +93,14 @@ class HomeControllerSpec
 
   "HomeController#addTodoItem [POST /api/todo-item]" should {
     "return 201 Created" in {
-      val currentLocalDateTime = java.time.LocalDateTime.now
+      val currentDateTime = DateTime.now
       val uuid = UUID.fromString("6a89c002-da0b-4f0d-8829-71062bc7469f")
       val json = Json.obj(
         "uuid" -> uuid.toString,
         "name" -> "do test",
         "is_completed" -> false,
-        "created_at" -> currentLocalDateTime.toString,
-        "updated_at" -> currentLocalDateTime.toString
+        "created_at" -> currentDateTime.toString,
+        "updated_at" -> currentDateTime.toString
       )
       val fakeRequest = FakeRequest(
         POST,
@@ -112,8 +114,8 @@ class HomeControllerSpec
             uuid,
             "do test",
             isCompleted = false,
-            currentLocalDateTime,
-            currentLocalDateTime
+            currentDateTime,
+            currentDateTime
           )
         )
       ).thenReturn(
@@ -126,14 +128,14 @@ class HomeControllerSpec
 
   "HomeController#updateTodoItem [PUT /api/todo-item]" should {
     "return 200 Ok" in {
-      val currentLocalDateTime = java.time.LocalDateTime.now
+      val currentDateTime = DateTime.now
       val uuid = UUID.fromString("6a89c002-da0b-4f0d-8829-71062bc7469f")
       val json = Json.obj(
         "uuid" -> uuid,
         "name" -> "do test2",
         "is_completed" -> false,
-        "created_at" -> currentLocalDateTime.toString,
-        "updated_at" -> currentLocalDateTime.toString
+        "created_at" -> currentDateTime.toString,
+        "updated_at" -> currentDateTime.toString
       )
       val fakeRequest =
         FakeRequest(PUT, "/api/todo-item", fakeJsonHeaders, json)
@@ -143,8 +145,8 @@ class HomeControllerSpec
             uuid,
             "do test2",
             isCompleted = false,
-            currentLocalDateTime,
-            currentLocalDateTime
+            currentDateTime,
+            currentDateTime
           )
         )
       ).thenReturn(
@@ -154,8 +156,8 @@ class HomeControllerSpec
               uuid,
               "do test2",
               isCompleted = false,
-              currentLocalDateTime,
-              currentLocalDateTime
+              currentDateTime,
+              currentDateTime
             )
           )
         )

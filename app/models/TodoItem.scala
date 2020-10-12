@@ -1,40 +1,47 @@
 package models
 
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 import java.util.UUID
-
+import play.api.libs.json._
 import play.api.libs.functional.syntax.{toFunctionalBuilderOps, unlift}
-import play.api.libs.json.{JsPath, OWrites, Reads}
 import reactivemongo.api.bson._
-//import reactivemongo.bson.Macros
+import org.joda.time.DateTime
+import org.joda.time.format.DateTimeFormat
+import org.joda.time.format.DateTimeFormatter
 import scala.util.Try
 
 case class TodoItem(
     uuid: UUID = UUID.randomUUID(),
     name: String = "",
     isCompleted: Boolean = false,
-    createdAt: LocalDateTime = java.time.LocalDateTime.now(),
-    updatedAt: LocalDateTime = java.time.LocalDateTime.now()
+    createdAt: DateTime = DateTime.now,
+    updatedAt: DateTime = DateTime.now
 )
 
 object TodoItem {
+  private implicit val dateTimeWriter: Writes[DateTime] =
+    JodaWrites.jodaDateWrites("dd/MM/yyyy HH:mm:ss")
+  private implicit val dateTimeJsReader: Reads[DateTime] =
+    JodaReads.jodaDateReads("yyyyMMddHHmmss")
+
   implicit val todoItemOWrites: OWrites[TodoItem] = (
     (JsPath \ "uuid").write[UUID] and
       (JsPath \ "name").write[String] and
       (JsPath \ "is_completed").write[Boolean] and
-      (JsPath \ "created_at").write[LocalDateTime] and
-      (JsPath \ "updated_at").write[LocalDateTime]
+      (JsPath \ "created_at").write[DateTime] and
+      (JsPath \ "updated_at").write[DateTime]
   )(unlift(TodoItem.unapply))
   implicit val todoItemReads: Reads[TodoItem] = (
     (JsPath \ "uuid").read[UUID] and
       (JsPath \ "name").read[String] and
       (JsPath \ "is_completed").read[Boolean] and
-      (JsPath \ "created_at").read[LocalDateTime] and
-      (JsPath \ "updated_at").read[LocalDateTime]
+      (JsPath \ "created_at").read[DateTime] and
+      (JsPath \ "updated_at").read[DateTime]
   )(TodoItem.apply _)
 
   implicit object TodoItemReader extends BSONDocumentReader[TodoItem] {
+    private val formatter: DateTimeFormatter =
+      DateTimeFormat.forPattern("dd/MM/yyyy HH:mm:ss")
+
     def readDocument(bson: BSONDocument): Try[TodoItem] = {
       for {
         uuid <- bson.getAsTry[String]("uuid")
@@ -46,10 +53,8 @@ object TodoItem {
         UUID.fromString(uuid),
         name,
         isCompleted,
-        LocalDateTime
-          .parse(createdAt.toString, DateTimeFormatter.ISO_LOCAL_DATE_TIME),
-        LocalDateTime
-          .parse(updatedAt.toString, DateTimeFormatter.ISO_LOCAL_DATE_TIME)
+        formatter.parseDateTime(createdAt),
+        formatter.parseDateTime(updatedAt)
       )
     }
   }
