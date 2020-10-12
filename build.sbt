@@ -14,6 +14,7 @@ libraryDependencies ++= Seq(
   "org.mockito" % "mockito-core" % "3.5.13" % Test,
   "joda-time" % "joda-time" % "2.10.6",
   "com.typesafe.play" %% "play-json-joda" % "2.9.1",
+  "com.typesafe.play" %% "play-json-joda" % "2.9.1",
   "org.mongodb" % "bson" % "4.1.0"
 )
 

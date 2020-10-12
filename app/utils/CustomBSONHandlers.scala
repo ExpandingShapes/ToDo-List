@@ -3,7 +3,7 @@ package utils
 import org.bson.types.ObjectId
 import org.joda.time.DateTime
 import scala.util.Success
-import reactivemongo.api.bson.{BSONArray, BSONDateTime, BSONReader, BSONValue}
+import reactivemongo.api.bson.{BSONDateTime, BSONValue}
 import reactivemongo.bson.{BSONObjectID, DefaultBSONHandlers}
 import reactivemongo.api.bson.BSONHandler
 import scala.util.{Failure, Try}
