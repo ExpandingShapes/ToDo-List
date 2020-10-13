@@ -23,9 +23,8 @@ case class TodoItem(
 
 trait TodoItemJson {
   val oidReads = Reads[ObjectId](js => js.validate[String].map(new ObjectId(_)))
-  implicit val jodaDateWrites: Writes[DateTime] = new Writes[DateTime] {
-    def writes(d: DateTime): JsValue = JsString(d.toString())
-  }
+  implicit val jodaDateWrites: Writes[DateTime] = (d: DateTime) =>
+    JsString(d.toString())
 
   implicit val writes: Writes[TodoItem] = (o: TodoItem) =>
     Json.obj(

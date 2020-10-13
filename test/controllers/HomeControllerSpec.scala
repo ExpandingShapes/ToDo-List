@@ -1,6 +1,5 @@
 package controllers
 
-import java.util.UUID
 import scala.concurrent.Future
 import akka.stream.Materializer
 import org.mockito.Mockito.when
@@ -17,9 +16,11 @@ import reactivemongo.api.commands.{
   Upserted,
   WriteError
 }
-import models.TodoItem
+import play.api.libs.json.JodaWrites._
+import org.bson.types.ObjectId
 import org.joda.time.DateTime
 import services.TodoItemService
+import models.TodoItem
 
 class HomeControllerSpec
     extends PlaySpec
@@ -78,14 +79,14 @@ class HomeControllerSpec
     }
   }
 
-  "HomeController#getTodoItem [GET /api/todo-items/:uuid]" should {
+  "HomeController#getTodoItem [GET /api/todo-items/:id]" should {
     "return 200 Ok" in {
-      val uuid = UUID.fromString("347f494a-47eb-4d40-be2d-8fe626094932")
+      val id = "507f1f77bcf86cd799439011"
       val fakeRequest =
-        FakeRequest(GET, s"api/todo-items/$uuid", FakeHeaders(), AnyContent())
-      when(todoItemService.getItem(uuid))
-        .thenReturn(Future.successful(Some(TodoItem())))
-      val result = controller.getTodoItem(uuid)(fakeRequest)
+        FakeRequest(GET, s"api/todo-items/$id", FakeHeaders(), AnyContent())
+      when(todoItemService.getItem(id))
+        .thenReturn(Future.successful(Some(TodoItem(new ObjectId(id)))))
+      val result = controller.getTodoItem(id)(fakeRequest)
       status(result) mustBe OK
     }
   }
@@ -93,13 +94,13 @@ class HomeControllerSpec
   "HomeController#addTodoItem [POST /api/todo-item]" should {
     "return 201 Created" in {
       val currentDateTime = DateTime.now
-      val uuid = UUID.fromString("6a89c002-da0b-4f0d-8829-71062bc7469f")
+      val id = "507f1f77bcf86cd799439011"
       val json = Json.obj(
-        "uuid" -> uuid.toString,
+        "id" -> id,
         "name" -> "do test",
         "is_completed" -> false,
-        "created" -> currentDateTime.toString,
-        "updated" -> currentDateTime.toString
+        "created" -> Json.toJson(currentDateTime),
+        "updated" -> Json.toJson(currentDateTime)
       )
       val fakeRequest = FakeRequest(
         POST,
@@ -110,7 +111,7 @@ class HomeControllerSpec
       when(
         todoItemService.createItem(
           TodoItem(
-            uuid,
+            new ObjectId(id),
             "do test",
             isCompleted = false,
             currentDateTime,
@@ -128,20 +129,20 @@ class HomeControllerSpec
   "HomeController#updateTodoItem [PUT /api/todo-item]" should {
     "return 200 Ok" in {
       val currentDateTime = DateTime.now
-      val uuid = UUID.fromString("6a89c002-da0b-4f0d-8829-71062bc7469f")
+      val id = "507f1f77bcf86cd799439011"
       val json = Json.obj(
-        "uuid" -> uuid,
+        "id" -> id,
         "name" -> "do test2",
         "is_completed" -> false,
-        "created" -> currentDateTime.toString,
-        "updated" -> currentDateTime.toString
+        "created" -> Json.toJson(currentDateTime),
+        "updated" -> Json.toJson(currentDateTime)
       )
       val fakeRequest =
         FakeRequest(PUT, "/api/todo-item", fakeJsonHeaders, json)
       when(
         todoItemService.updateItem(
           TodoItem(
-            uuid,
+            new ObjectId(id),
             "do test2",
             isCompleted = false,
             currentDateTime,
@@ -152,7 +153,7 @@ class HomeControllerSpec
         Future.successful(
           Some(
             TodoItem(
-              uuid,
+              new ObjectId(id),
               "do test2",
               isCompleted = false,
               currentDateTime,
@@ -162,13 +163,12 @@ class HomeControllerSpec
         )
       )
       val result = controller.updateTodoItem()(fakeRequest)
-      status(result) mustBe Ok
+      status(result) mustBe 200
     }
   }
 
   "HomeController#updateAllTodoItems [PATCH /api/todo-items/is-completed]" should {
     "return 204 NoContent" in {
-      val uuid = UUID.fromString("6a89c002-da0b-4f0d-8829-71062bc7469f")
       val json = Json.obj(
         "is_completed" -> true
       )
@@ -189,14 +189,14 @@ class HomeControllerSpec
     }
   }
 
-  "HomeController#removeTodoItem [DELETE /api/todo-item/:uuid]" should {
+  "HomeController#removeTodoItem [DELETE /api/todo-item/:id]" should {
     "return 200 Ok" in {
-      val uuid = UUID.fromString("347f494a-47eb-4d40-be2d-8fe626094932")
+      val id = "507f1f77bcf86cd799439011"
       val fakeRequest =
-        FakeRequest(DELETE, s"api/todo-item/$uuid", FakeHeaders(), AnyContent())
-      when(todoItemService.deleteItem(uuid))
-        .thenReturn(Future.successful(Some(TodoItem())))
-      val result = controller.removeTodoItem(uuid)(fakeRequest)
+        FakeRequest(DELETE, s"api/todo-item/$id", FakeHeaders(), AnyContent())
+      when(todoItemService.deleteItem(id))
+        .thenReturn(Future.successful(Some(TodoItem(new ObjectId(id)))))
+      val result = controller.removeTodoItem(id)(fakeRequest)
       status(result) mustBe OK
     }
   }
