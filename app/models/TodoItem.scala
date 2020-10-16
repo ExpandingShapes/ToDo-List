@@ -4,15 +4,18 @@ import org.bson.types.ObjectId
 import org.joda.time.DateTime
 import play.api.libs.json.JodaReads._
 import play.api.libs.json._
-import play.api.libs.json.{Reads, Json, JsonConfiguration, OWrites}
-import play.api.libs.json.JsonNaming.SnakeCase
-import play.api.libs.functional.syntax.{toFunctionalBuilderOps, unlift}
-import reactivemongo.api.bson.{BSONDocumentHandler, Macros}
+import play.api.libs.functional.syntax.toFunctionalBuilderOps
+import reactivemongo.api.bson.{
+  BSONDocumentHandler,
+  FieldNaming,
+  MacroConfiguration,
+  Macros
+}
 import reactivemongo.api.bson.Macros.Annotations.{Key => BsonKey}
 import utils.CustomBSONHandlers
 
 case class TodoItem(
-    _id: ObjectId,
+    _id: ObjectId = new ObjectId,
     name: String = "",
     @BsonKey("is_completed") isCompleted: Boolean = false,
     created: DateTime = DateTime.now,
@@ -45,9 +48,16 @@ trait TodoItemJson {
 }
 
 trait TodoItemBson extends CustomBSONHandlers {
-  implicit val config = JsonConfiguration(SnakeCase)
-  implicit val bsonHandler: BSONDocumentHandler[TodoItem] =
+
+  implicit val bsonHandler: BSONDocumentHandler[TodoItem] = {
+
+    implicit def cfg: MacroConfiguration =
+      MacroConfiguration(
+        fieldNaming = FieldNaming.SnakeCase
+      )
+
     Macros.handler[TodoItem]
+  }
 }
 
 object TodoItem extends TodoItemJson with TodoItemBson

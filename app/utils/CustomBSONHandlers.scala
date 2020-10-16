@@ -1,18 +1,16 @@
 package utils
 
+import scala.util.{Try, Success, Failure}
 import org.bson.types.ObjectId
 import org.joda.time.DateTime
-import scala.util.Success
-import reactivemongo.api.bson.{BSONDateTime, BSONValue}
-import reactivemongo.bson.{BSONObjectID, DefaultBSONHandlers}
-import reactivemongo.api.bson.BSONHandler
-import scala.util.{Failure, Try}
+import reactivemongo.api.bson.{BSONDateTime, BSONObjectID, BSONValue}
 
-trait CustomBSONHandlers extends DefaultBSONHandlers {
+trait CustomBSONHandlers {
   implicit object BSONJodaDateTimeHandler
       extends reactivemongo.api.bson.BSONHandler[DateTime] {
     def writeTry(t: DateTime): Try[BSONValue] =
       Success(BSONDateTime(t.getMillis))
+
     def readTry(bson: BSONValue): Try[DateTime] =
       bson match {
         case BSONDateTime(l) => Try(new DateTime(l))
@@ -25,7 +23,9 @@ trait CustomBSONHandlers extends DefaultBSONHandlers {
       }
   }
 
-  implicit object BSONObjectIdHandler extends BSONHandler[ObjectId] {
+  implicit object BSONObjectIdHandler
+      extends reactivemongo.api.bson.BSONHandler[ObjectId] {
+
     override def writeTry(t: ObjectId): Try[BSONValue] =
       reactivemongo.api.bson.BSONObjectID.parse(t.toString)
 

@@ -5,9 +5,8 @@ import scala.concurrent.{ExecutionContext, Future}
 import play.modules.reactivemongo.ReactiveMongoApi
 import reactivemongo.api.Cursor
 import reactivemongo.api.bson.collection.BSONCollection
-import reactivemongo.api.commands.{UpdateWriteResult, WriteResult}
+import reactivemongo.api.commands.WriteResult
 import reactivemongo.api.bson.BSONDocument
-import reactivemongo.api.bson.compat.{legacyWriterNewValue, toDocumentWriter}
 import models.TodoItem
 
 class TodoItemDAO @Inject() (implicit
@@ -58,7 +57,7 @@ class TodoItemDAO @Inject() (implicit
       .map(_.result[TodoItem])
   }
 
-  def updateAll(isCompleted: Boolean): Future[UpdateWriteResult] = {
+  def updateAll(isCompleted: Boolean): Future[WriteResult] = {
     collection.flatMap { c =>
       c.update.one(
         q = BSONDocument.empty,
