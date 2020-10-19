@@ -27,7 +27,7 @@ trait CustomBSONHandlers {
       extends reactivemongo.api.bson.BSONHandler[ObjectId] {
 
     override def writeTry(t: ObjectId): Try[BSONValue] =
-      reactivemongo.api.bson.BSONObjectID.parse(t.toString)
+      BSONObjectID.parse(t.toString)
 
     override def readTry(bson: BSONValue): Try[ObjectId] =
       bson match {

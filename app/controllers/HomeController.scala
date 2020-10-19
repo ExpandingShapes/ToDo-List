@@ -47,7 +47,7 @@ class HomeController @Inject() (
         }
         .getOrElse {
           logger.debug(
-            "Failed to create a new todoItem from JSON: \n $request.body"
+            s"Failed to create a new todoItem from JSON: \n ${request.body}"
           )
           Future.successful(BadRequest("Received invalid JSON"))
         }

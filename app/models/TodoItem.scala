@@ -2,13 +2,12 @@ package models
 
 import org.bson.types.ObjectId
 import org.joda.time.DateTime
-import play.api.libs.json.JodaReads._
 import play.api.libs.json._
-import play.api.libs.functional.syntax.toFunctionalBuilderOps
 import reactivemongo.api.bson.{
   BSONDocumentHandler,
   FieldNaming,
   MacroConfiguration,
+  MacroOptions,
   Macros
 }
 import reactivemongo.api.bson.Macros.Annotations.{Key => BsonKey}
@@ -19,44 +18,32 @@ case class TodoItem(
     name: String = "",
     @BsonKey("is_completed") isCompleted: Boolean = false,
     created: DateTime = DateTime.now,
-    updated: DateTime = DateTime.now
-) {
-  val id: String = _id.toString
-}
+    updated: DateTime = DateTime.now,
+    var id: String = ""
+) { id = _id.toString }
 
 trait TodoItemJson {
-  val oidReads = Reads[ObjectId](js => js.validate[String].map(new ObjectId(_)))
+  implicit val oidReads =
+    Reads[ObjectId](js => js.validate[String].map(new ObjectId(_)))
+  implicit val oidWrites: Writes[ObjectId] = (oid: ObjectId) => {
+    Json.obj(
+      "$oid" -> oid.toString
+    )
+  }
   implicit val jodaDateWrites: Writes[DateTime] = (d: DateTime) =>
     JsString(d.toString())
-
-  implicit val writes: Writes[TodoItem] = (o: TodoItem) =>
-    Json.obj(
-      "id" -> o.id,
-      "name" -> o.name,
-      "is_completed" -> o.isCompleted,
-      "created" -> Json.toJson(o.created),
-      "updated" -> Json.toJson(o.updated)
-    )
-
-  implicit val reads: Reads[TodoItem] = (
-    (__ \ "id").read[ObjectId](oidReads) and
-      (__ \ "name").read[String] and
-      (__ \ "is_completed").read[Boolean] and
-      (__ \ "created").read[DateTime] and
-      (__ \ "updated").read[DateTime]
-  )(TodoItem.apply _)
+  implicit def jsonFormat: OFormat[TodoItem] =
+    Json.using[Json.WithDefaultValues].format[TodoItem]
 }
 
 trait TodoItemBson extends CustomBSONHandlers {
-
   implicit val bsonHandler: BSONDocumentHandler[TodoItem] = {
-
     implicit def cfg: MacroConfiguration =
       MacroConfiguration(
         fieldNaming = FieldNaming.SnakeCase
       )
 
-    Macros.handler[TodoItem]
+    Macros.using[MacroOptions.Default].handler[TodoItem]
   }
 }
 
