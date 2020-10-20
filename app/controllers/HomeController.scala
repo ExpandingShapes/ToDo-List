@@ -97,9 +97,9 @@ class HomeController @Inject() (
       }
     }
 
-  def removeAllTodoItems(): Action[AnyContent] =
+  def removeAllCompletedTodoItems(): Action[AnyContent] =
     Action.async {
-      todoItemService.deleteAllItems().map { _ =>
+      todoItemService.deleteAllCompletedItems().map { _ =>
         NoContent
       }
     }

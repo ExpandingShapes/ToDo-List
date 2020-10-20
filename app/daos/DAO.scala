@@ -10,5 +10,5 @@ trait DAO[T] {
   def update(t: T): Future[Option[T]]
   def updateAll(i: Boolean): Future[WriteResult]
   def delete(id: String): Future[Option[T]]
-  def deleteAll(): Future[WriteResult]
+  def deleteAllCompleted(): Future[WriteResult]
 }

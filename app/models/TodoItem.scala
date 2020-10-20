@@ -30,6 +30,7 @@ trait TodoItemJson {
       "$oid" -> oid.toString
     )
   }
+  implicit val jodaDateReads = JodaReads.jodaDateReads("yyyy-MM-dd HH:mm:ss")
   implicit val jodaDateWrites: Writes[DateTime] = (d: DateTime) =>
     JsString(d.toString())
   implicit def jsonFormat: OFormat[TodoItem] =

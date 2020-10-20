@@ -10,4 +10,4 @@ PATCH   /api/todo-items/is-completed  controllers.HomeController.updateAllTodoIt
 + nocsrf
 DELETE  /api/todo-item/:id            controllers.HomeController.removeTodoItem(id: String)
 + nocsrf
-DELETE  /api/todo-items               controllers.HomeController.removeAllTodoItems()
+DELETE  /api/todo-items               controllers.HomeController.removeAllCompletedTodoItems()

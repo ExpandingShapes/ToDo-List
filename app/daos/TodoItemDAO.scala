@@ -77,9 +77,10 @@ class TodoItemDAO @Inject() (implicit
         .map(_.result[TodoItem])
     )
 
-  def deleteAll(): Future[WriteResult] =
+  def deleteAllCompleted(): Future[WriteResult] =
     for {
       deleteBuilder <- collection.map(c => c.delete(ordered = false))
-      result <- deleteBuilder.one(BSONDocument.empty, None, None)
+      result <-
+        deleteBuilder.one(BSONDocument("is_completed" -> true), None, None)
     } yield result
 }
