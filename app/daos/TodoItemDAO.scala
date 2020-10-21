@@ -9,6 +9,7 @@ import reactivemongo.api.bson.collection.BSONCollection
 import reactivemongo.api.commands.WriteResult
 import reactivemongo.api.bson.{BSONDocument, BSONObjectID}
 import models.TodoItem
+import org.joda.time.DateTime
 
 class TodoItemDAO @Inject() (implicit
     ec: ExecutionContext,
@@ -39,10 +40,9 @@ class TodoItemDAO @Inject() (implicit
   def update(t: TodoItem): Future[Option[TodoItem]] = {
     val updateModifier = BSONDocument(
       "$set" -> BSONDocument(
-        "name" -> t.name,
         "is_completed" -> t.isCompleted,
         "created" -> t.created.toString,
-        "updated" -> t.updated.toString
+        "updated" -> DateTime.now.toString
       )
     )
 
