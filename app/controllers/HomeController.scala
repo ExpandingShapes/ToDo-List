@@ -21,6 +21,7 @@ class HomeController @Inject() (
     Action.async {
       todoItemService.getAllItems.map { items =>
         Ok(Json.toJson(items))
+
       }
     }
 
@@ -28,7 +29,9 @@ class HomeController @Inject() (
     Action.async { implicit request: Request[AnyContent] =>
       {
         todoItemService.getItem(id).map {
-          case Some(value) => Ok(Json.toJson(value))
+          case Some(value) =>
+            Ok(Json.toJson(value))
+
           case None =>
             logger.debug(s"todoItem with id = $id not found")
             NotFound
@@ -49,7 +52,9 @@ class HomeController @Inject() (
           logger.debug(
             s"Failed to create a new todoItem from JSON: \n ${request.body}"
           )
-          Future.successful(BadRequest("Received invalid JSON"))
+          Future.successful(
+            BadRequest("Received invalid JSON")
+          )
         }
     }
 
@@ -59,7 +64,9 @@ class HomeController @Inject() (
         .validate[TodoItem]
         .map { item =>
           todoItemService.updateItem(item).map {
-            case Some(value) => Ok(Json.toJson(item))
+            case Some(value) =>
+              Ok(Json.toJson(item))
+
             case None =>
               logger.debug(
                 s"Failed to update a todoItem because no todoItem with id = ${item.id} found."
@@ -71,7 +78,9 @@ class HomeController @Inject() (
           logger.debug(
             s"Failed to create a new todoItem from JSON: \n $request.body"
           )
-          Future.successful(BadRequest("Received bad JSON"))
+          Future.successful(
+            BadRequest("Received bad JSON")
+          )
         }
     }
 
