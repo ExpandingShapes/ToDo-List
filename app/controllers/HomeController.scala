@@ -60,28 +60,18 @@ class HomeController @Inject() (
 
   def updateTodoItem(): Action[JsValue] =
     Action.async(parse.json) { request: Request[JsValue] =>
-      request.body
-        .validate[TodoItem]
-        .map { item =>
-          todoItemService.updateItem(item).map {
-            case Some(value) =>
-              Ok(Json.toJson(item))
+      val id: String = (request.body \ "id").as[String]
+      val newIsCompleted: Boolean = (request.body \ "is_completed").as[Boolean]
 
-            case None =>
-              logger.debug(
-                s"Failed to update a todoItem because no todoItem with id = ${item.id} found."
-              )
-              NotFound
-          }
-        }
-        .getOrElse {
+      todoItemService.updateItem(id, newIsCompleted).map {
+        case Some(value) =>
+          Ok
+        case None =>
           logger.debug(
-            s"Failed to create a new todoItem from JSON: \n $request.body"
+            s"Failed to update a todoItem because no todoItem with id = ${id} found."
           )
-          Future.successful(
-            BadRequest("Received bad JSON")
-          )
-        }
+          NotFound
+      }
     }
 
   def updateAllTodoItems(): Action[JsValue] =

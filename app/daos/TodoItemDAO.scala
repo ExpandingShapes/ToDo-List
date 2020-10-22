@@ -7,7 +7,7 @@ import play.modules.reactivemongo.ReactiveMongoApi
 import reactivemongo.api.Cursor
 import reactivemongo.api.bson.collection.BSONCollection
 import reactivemongo.api.commands.WriteResult
-import reactivemongo.api.bson.{BSONDocument, BSONObjectID}
+import reactivemongo.api.bson.{BSONDateTime, BSONDocument, BSONObjectID}
 import models.TodoItem
 import org.joda.time.DateTime
 
@@ -37,19 +37,20 @@ class TodoItemDAO @Inject() (implicit
   def create(t: TodoItem): Future[WriteResult] =
     collection.flatMap(_.insert.one(t.copy()))
 
-  def update(t: TodoItem): Future[Option[TodoItem]] = {
+  def update(id: String, newIsCompleted: Boolean): Future[Option[TodoItem]] = {
     val updateModifier = BSONDocument(
       "$set" -> BSONDocument(
-        "is_completed" -> t.isCompleted,
-        "created" -> t.created.toString,
-        "updated" -> DateTime.now.toString
+        "is_completed" -> newIsCompleted,
+        "updated" -> BSONDateTime(
+          DateTime.now.getMillis
+        )
       )
     )
 
     collection
       .flatMap(
         _.findAndUpdate(
-          BSONDocument("id" -> t.id),
+          BSONDocument("id" -> id),
           updateModifier,
           fetchNewObject = true
         )
